@@ -5,7 +5,7 @@ import java.awt.Image;
 public class SnakeDrive {
     public static void main(String[] args){
         JFrame frame = new JFrame("Snek");
-         frame.setSize(825, 541);
+         frame.setSize(825, 541);   
          frame.setLocation(0, 0);
          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        	 frame.setContentPane(new SnakePanel());

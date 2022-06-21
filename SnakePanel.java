@@ -48,23 +48,20 @@ public class SnakePanel extends JPanel
       cellWidth = 20;   //dimension of cell
       startPos = 1+(cells/2)*cellWidth;   //starting position is center of grid
 
-      //*create an algorithm that SOLVES/beats SNEK (most efficient path while surviving)
+      //Challenge: create an algorithm that beats SNEK (most efficient path while surviving)
       //based on cur pos & apple pos, finds optimal path ONCE, store solution in data structure,
-      //if not empty: follow solution;
-      //hard part: optimal path algorithm
-
-      //problem 1: not v responsive at slower time controls
-      //problem 2: after dying, if you change time control, time increments by one frame, affecting score
-      //problem 3: music stops after song ends - need repeat or new song
+      //if not empty: follow solution
+      //hard part: optimal path algorithm - DFS, BFS, DP, greedy, etc.
 
       //feature add 1: size scalability - drag compatibility
       //feature add 2: custom m x n grid
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
       player = new AudioPlayer();
-      // URL urlToImg = this.getClass().getResource("/media/snail.png"); //alternative way to access img in diff folder
-      // speed1 = new JButton(new ImageIcon(urlToImg));
       
+      //alternative way to access img in diff folder:
+      // URL urlToImg = this.getClass().getResource("/media/snail.png"); 
+      // speed1 = new JButton(new ImageIcon(urlToImg));
       speed1 = new JButton(new ImageIcon("./media/snail.png"));
       speed1.setBounds(640, 320, 45, 45);
       defaultBorder = speed1.getBorder(); //save default border look
@@ -400,9 +397,9 @@ public class SnakePanel extends JPanel
       fruitWorth = 100;        
       keyUp = isPlaying = true;
       keyDown = keyRight = keyLeft = false;
-      buttonsOff();
       spencer = new Snake(startPos, snakeLength);
       apple = new Apple(spencer);
+      buttonsOff();
       startTimer();
       player.play(audioFilePath);
    }

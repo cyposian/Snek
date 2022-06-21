@@ -22,6 +22,7 @@ public class AudioPlayer implements LineListener {
             DataLine.Info info = new DataLine.Info(Clip.class, format);
             audioClip = (Clip) AudioSystem.getLine(info);
             audioClip.open(audioStream);
+            audioClip.loop(Clip.LOOP_CONTINUOUSLY);
 
             audioClip.start();
             } catch (UnsupportedAudioFileException ex) {
