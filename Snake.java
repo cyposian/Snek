@@ -51,18 +51,10 @@ public class Snake {
         temp.next = null;
     }
     public void move(int x, int y, boolean ateApple){   //movement by deleting last, pushing head
-        if(y==0){
-            if(!ateApple){  //delete last node to move if haven't eaten apple; if have, don't delete
-                deleteLast();
-            }
-            push(head.xcor+x,head.ycor);
+        if(!ateApple){ //delete last/tail node if haven't eaten apple
+            deleteLast();
         }
-        if(x==0){
-            if(!ateApple){
-                deleteLast();
-            }
-            push(head.xcor,head.ycor+y);
-        }
+        push(head.xcor+x,head.ycor+y);
     }
     public boolean ateSelf(int x, int y){
         Node temp = head.next;

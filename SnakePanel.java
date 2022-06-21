@@ -54,6 +54,12 @@ public class SnakePanel extends JPanel
       //if not empty: follow solution;
       //hard part: optimal path algorithm
 
+      //problem 1: not v responsive at slower time controls
+      //problem 2: after dying, if you change time control, time increments by one frame, affecting score
+
+      //feature add 1: size scalability - drag compatibility
+      //feature add 2: custom m x n grid
+
       audioFilePath = "./media/Interstellar OST - No Time for Caution.wav";
       // audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
       player = new AudioPlayer();
