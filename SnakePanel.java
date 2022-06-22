@@ -23,7 +23,7 @@ import javax.swing.border.Border;
 public class SnakePanel extends JPanel
 {
    private BufferedImage myImage;
-   private boolean keyUp,keyDown,keyLeft,keyRight,isPlaying;
+   private boolean keyUp,keyDown,keyLeft,keyRight,isPlaying,startScreen;
    private int startPos,snakeLength,high,fruits,fruitWorth,score,ms,direction,cells,cellWidth,difficulty;
    private Snake spencer;
    private Apple apple;
@@ -33,13 +33,15 @@ public class SnakePanel extends JPanel
    private Scanner infile;
    private JButton speed1, speed2, speed3, speed4, speed5, speed6;
    private AudioPlayer player;
-   private String audioFilePath;
+   private String audioFilePath, myFont, myFont2;
    
    public SnakePanel()
    {
       this.setLayout(null);
       myImage = new BufferedImage(600, 600, BufferedImage.TYPE_INT_RGB); //size doesn't matter?
-      keyUp = isPlaying = true;    //starts game moving upwards
+      myFont = "Proxon"; //default = Monospaced
+      myFont2 = "Monospaced";
+      keyUp = isPlaying = startScreen = true;    //starts game moving upwards
       keyDown = keyLeft = keyRight = false;
       fruits = score = direction = 0;  //direction: 0 = up, 1 = right, 2 = down, 3 = left
       fruitWorth = 100; 
@@ -55,6 +57,8 @@ public class SnakePanel extends JPanel
 
       //feature add 1: size scalability - drag compatibility
       //feature add 2: custom m x n grid
+      //feature add 3: obstacles in map
+      //feature add 4: sound effects on eating apple or losing
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
       player = new AudioPlayer();
@@ -159,6 +163,7 @@ public class SnakePanel extends JPanel
       speed5.setEnabled(false);
       speed6.setEnabled(false);
    }
+
    public void buttonsOn() {
       speed1.setEnabled(true);
       speed2.setEnabled(true);
@@ -167,6 +172,7 @@ public class SnakePanel extends JPanel
       speed5.setEnabled(true);
       speed6.setEnabled(true);
    }
+
    public void defaultBorders() {
       speed1.setBorder(BorderFactory.createTitledBorder(defaultBorder));
       speed2.setBorder(BorderFactory.createTitledBorder(defaultBorder));
@@ -186,6 +192,7 @@ public class SnakePanel extends JPanel
          System.out.println("timer restarted from startTimer()");
       }
    }
+
    public class Listener implements ActionListener {
       public void actionPerformed(ActionEvent e) {
          ms+=difficulty;      //counting time
@@ -195,11 +202,13 @@ public class SnakePanel extends JPanel
          repaint();  //update graphics every "difficulty" milliseconds
       }
    }
+
    public boolean hitWall(int x, int y) {
       if(x < 0 || x > 481 || y < 0 || y > 481)
          return true;
       return false;
    }
+
    public void moveSnake(int x, int y, Graphics g) {
       if(ms > difficulty) { //only move after game has started - no preemptive moving
          if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) {   //snake eats apple
@@ -222,12 +231,14 @@ public class SnakePanel extends JPanel
             }
          }
       }
+      
+      g.setColor(Color.red); //draw Apple
+      g.fillOval(apple.getxcor(), apple.getycor(), 20, 20);
+
       drawSnake(g);
    }
-   public void drawSnake(Graphics g) {
-      g.setColor(Color.red); //draw Apple
-      g.fillOval(apple.getxcor(), apple.getycor(), 20, 20); 
 
+   public void drawSnake(Graphics g) {
       Snake.Node temp = spencer.head;
       while(temp != null) { //draw snake body
          g.setColor(Color.black);   //borders of segments
@@ -280,47 +291,14 @@ public class SnakePanel extends JPanel
          for (int x = 1; x < cellWidth * cells; x += cellWidth) {
             g.drawRect(x, y, cellWidth, cellWidth);
          }
-      }
+      }      
 
-      if(keyDown) {   //going down (2), can't up (0)
-         if(direction == 0) {
-            moveSnake(0, -20, g);
-         } else {
-            direction = 2;
-            moveSnake(0, 20, g);
-         }
-      }
-      if(keyUp) {  //going up (0), can't down (2)
-         if(direction == 2) {
-            moveSnake(0, 20, g);
-         } else {
-            direction = 0;
-            moveSnake(0, -20, g);
-         }   
-      }
-      if(keyLeft) { //going left (3), can't right (1)
-         if(direction == 1) {
-            moveSnake(20, 0, g);
-         } else {
-            direction = 3;
-            moveSnake(-20, 0, g);
-         }
-      }
-      if(keyRight) { //going right (1), can't left (3)
-        if(direction == 3) {
-            moveSnake(-20, 0, g);
-         } else {
-            direction = 1;
-            moveSnake(20, 0, g);
-         }
-      }
-
-      g.setColor(Color.yellow);
-      g.setFont(new Font("Monospaced", Font.BOLD, 30));;
+      g.setColor(Color.yellow);  //draw right panel
+      g.setFont(new Font(myFont, Font.BOLD, 30));;
       g.drawString("Snek", 620, 80);
 
       g.setColor(Color.white);
-      g.setFont(new Font("Monospaced", Font.PLAIN, 18));
+      g.setFont(new Font(myFont2, Font.PLAIN, 18));
       g.drawString("Score:" + score, 530, 120);
       g.drawString("Fruits Eaten:" + fruits, 530, 150);
       g.drawString("Fruit Value:" + fruitWorth, 530, 180);
@@ -332,27 +310,72 @@ public class SnakePanel extends JPanel
       g.drawString("Left/A", 530, 390);
       g.drawString("Right/D", 530, 420);
       g.drawString("Pause:P", 530, 450);
-      g.setFont(new Font("Monospaced", Font.BOLD, 18));
-      g.drawString("Controls:", 530, 300);
-      g.drawString("Difficulty:", 660, 300);
+      g.setFont(new Font(myFont, Font.PLAIN, 18));
+      g.drawString("Controls :", 530, 300);
+      g.drawString("Difficulty :", 660, 300);
 
-      if(isPlaying == false) {
+      if(startScreen == true) { //start screen
+         System.out.println("startScreen");
+         g.setColor(Color.cyan);
+         g.setFont(new Font(myFont, Font.PLAIN, 35));
+         g.drawString("Select a difficulty", 95, 225);
+         g.drawString("to start", 185, 295);
+         
+         drawSnake(g);
+         return;
+      }
+      
+      if(keyDown) {   //going down (2), can't up (0)
+         if(direction == 0) {
+            moveSnake(0, -20, g);
+            } else {
+               direction = 2;
+               moveSnake(0, 20, g);
+            }
+         }
+      if(keyUp) {  //going up (0), can't down (2)
+         if(direction == 2) {
+            moveSnake(0, 20, g);
+         } else {
+            direction = 0;
+            moveSnake(0, -20, g);
+         }   
+      }
+      if(keyLeft) { //going left (3), can't right (1)
+         if(direction == 1) {
+               moveSnake(20, 0, g);
+            } else {
+               direction = 3;
+               moveSnake(-20, 0, g);
+            }
+      }
+      if(keyRight) { //going right (1), can't left (3)
+        if(direction == 3) {
+            moveSnake(-20, 0, g);
+         } else {
+            direction = 1;
+            moveSnake(20, 0, g);
+         }
+      }
+
+      if(isPlaying == false) {   //end screen
          buttonsOn();
          System.out.println("Buttons on");
          if(score > high) {
             high = score;
-            g.setFont(new Font("Monospaced", Font.BOLD, 35));
+            g.setFont(new Font(myFont, Font.BOLD, 40));
             g.setColor(Color.orange);
-            g.drawString("NEW HIGH SCORE!!!", 85, 180);
+            g.drawString("NEW HIGH SCORE !", 60, 180);
             g.setColor(Color.red);
-            g.drawString("GAME OVER", 160, 255);
-            g.setFont(new Font("Monospaced", Font.PLAIN, 35));
-            g.drawString("Press Enter to Restart", 25, 330);
+            g.drawString("GAME OVER", 120, 255);
+            g.setFont(new Font(myFont, Font.PLAIN, 35));
+            g.drawString("Press Enter to Restart", 45, 330);
          } else {
             g.setColor(Color.red);
-            g.setFont(new Font("Monospaced", Font.BOLD, 35));
-            g.drawString("GAME OVER", 160, 200);
-            g.drawString("Press Enter to Restart", 25, 275);
+            g.setFont(new Font(myFont, Font.BOLD, 38));
+            g.drawString("GAME OVER", 135, 200);
+            g.setFont(new Font(myFont, Font.PLAIN, 35));
+            g.drawString("Press Enter to Restart", 45, 275);
          }
       }
    }
@@ -392,8 +415,11 @@ public class SnakePanel extends JPanel
          }
       }
    }
+
    public void newGame() {
+      System.out.println("newGame");
       score = ms = fruits = direction = 0;
+      startScreen = false;
       fruitWorth = 100;        
       keyUp = isPlaying = true;
       keyDown = keyRight = keyLeft = false;
@@ -403,6 +429,7 @@ public class SnakePanel extends JPanel
       startTimer();
       player.play(audioFilePath);
    }
+
    public void endGame() {
       timer.stop();
       player.stop();
