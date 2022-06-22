@@ -39,8 +39,8 @@ public class SnakePanel extends JPanel
    {
       this.setLayout(null);
       myImage = new BufferedImage(600, 600, BufferedImage.TYPE_INT_RGB); //size doesn't matter?
-      myFont = "Proxon"; //default = Monospaced
-      myFont2 = "Monospaced";
+      myFont = "Proxon"; //Headers
+      myFont2 = "Monospaced"; //Body
       keyUp = isPlaying = startScreen = true;    //starts game moving upwards
       keyDown = keyLeft = keyRight = false;
       fruits = score = direction = 0;  //direction: 0 = up, 1 = right, 2 = down, 3 = left
@@ -186,10 +186,8 @@ public class SnakePanel extends JPanel
       if(timer == null || timer.getDelay() != difficulty){
          timer = new Timer(difficulty, new Listener());
          timer.start();
-         System.out.println("timer started from startTimer()");
       } else {
          timer.restart();
-         System.out.println("timer restarted from startTimer()");
       }
    }
 
@@ -315,7 +313,6 @@ public class SnakePanel extends JPanel
       g.drawString("Difficulty :", 660, 300);
 
       if(startScreen == true) { //start screen
-         System.out.println("startScreen");
          g.setColor(Color.cyan);
          g.setFont(new Font(myFont, Font.PLAIN, 35));
          g.drawString("Select a difficulty", 95, 225);
@@ -360,7 +357,6 @@ public class SnakePanel extends JPanel
 
       if(isPlaying == false) {   //end screen
          buttonsOn();
-         System.out.println("Buttons on");
          if(score > high) {
             high = score;
             g.setFont(new Font(myFont, Font.BOLD, 40));
@@ -417,7 +413,6 @@ public class SnakePanel extends JPanel
    }
 
    public void newGame() {
-      System.out.println("newGame");
       score = ms = fruits = direction = 0;
       startScreen = false;
       fruitWorth = 100;        
