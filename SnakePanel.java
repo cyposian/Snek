@@ -55,7 +55,7 @@ public class SnakePanel extends JPanel
       //Challenge: create an algorithm that beats SNEK (most efficient path while surviving)
       //based on cur pos & apple pos, finds optimal path ONCE, store solution in data structure,
       //if not empty: follow solution
-      //hard part: optimal path algorithm - DFS, BFS, DP, greedy, etc.
+      //hard part: optimal path algorithm - DFS, BFS, A*, greedy, etc.
 
       //feature add 1: size scalability - drag compatibility
       //feature add 2: custom m x n grid
@@ -63,7 +63,7 @@ public class SnakePanel extends JPanel
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
       audioBite1 = "./media/Apple Bite 2.wav";
-      audioLose = "./media/lose 2.wav";
+      audioLose = "./media/lose 1.wav";
       musicPlayer = new AudioPlayer();
       effectPlayer = new AudioPlayer();
       losePlayer = new AudioPlayer();

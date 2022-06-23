@@ -16,7 +16,8 @@ public class AudioPlayer implements LineListener {
     void play(String audioFilePath){
         File audiofile = new File(audioFilePath);
 
-        try{    //try looping or adding two songs!*
+        try{
+            System.out.println("Preparing to play");
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audiofile);
             AudioFormat format = audioStream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
@@ -24,6 +25,7 @@ public class AudioPlayer implements LineListener {
             audioClip.open(audioStream);
             
             audioClip.start();
+            System.out.println("Playing");
         } catch (UnsupportedAudioFileException ex) {
             System.out.println("The specified audio file is not supported.");
             ex.printStackTrace();
