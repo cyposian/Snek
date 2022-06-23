@@ -20,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
+//Sound from Zapsplat.com - apple bite noises
+
 public class SnakePanel extends JPanel
 {
    private BufferedImage myImage;
@@ -32,15 +34,15 @@ public class SnakePanel extends JPanel
    private Timer timer;
    private Scanner infile;
    private JButton speed1, speed2, speed3, speed4, speed5, speed6;
-   private AudioPlayer player;
-   private String audioFilePath, myFont, myFont2;
+   private AudioPlayer musicPlayer, effectPlayer, losePlayer;
+   private String audioFilePath, audioBite1, audioLose, myFont, myFont2;
    
    public SnakePanel()
    {
       this.setLayout(null);
-      myImage = new BufferedImage(600, 600, BufferedImage.TYPE_INT_RGB); //size doesn't matter?
-      myFont = "Proxon"; //Headers
-      myFont2 = "Monospaced"; //Body
+      myImage = new BufferedImage(825, 541, BufferedImage.TYPE_INT_RGB); //size doesn't matter?
+      myFont = "Proxon"; //Headers font
+      myFont2 = "Monospaced"; //Body font
       keyUp = isPlaying = startScreen = true;    //starts game moving upwards
       keyDown = keyLeft = keyRight = false;
       fruits = score = direction = 0;  //direction: 0 = up, 1 = right, 2 = down, 3 = left
@@ -48,7 +50,7 @@ public class SnakePanel extends JPanel
       snakeLength = 6;
       cells = 25;    //# of cells in grid
       cellWidth = 20;   //dimension of cell
-      startPos = 1+(cells/2)*cellWidth;   //starting position is center of grid
+      startPos = 1 + (cells / 2) * cellWidth;   //starting position is center of grid
 
       //Challenge: create an algorithm that beats SNEK (most efficient path while surviving)
       //based on cur pos & apple pos, finds optimal path ONCE, store solution in data structure,
@@ -58,11 +60,14 @@ public class SnakePanel extends JPanel
       //feature add 1: size scalability - drag compatibility
       //feature add 2: custom m x n grid
       //feature add 3: obstacles in map?
-      //feature add 4: sound effects on eating apple or losing
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
-      player = new AudioPlayer();
-      
+      audioBite1 = "./media/Apple Bite 2.wav";
+      audioLose = "./media/lose 2.wav";
+      musicPlayer = new AudioPlayer();
+      effectPlayer = new AudioPlayer();
+      losePlayer = new AudioPlayer();
+
       //alternative way to access img in diff folder:
       // URL urlToImg = this.getClass().getResource("/media/snail.png"); 
       // speed1 = new JButton(new ImageIcon(urlToImg));
@@ -193,8 +198,8 @@ public class SnakePanel extends JPanel
 
    public class Listener implements ActionListener {
       public void actionPerformed(ActionEvent e) {
-         ms+=difficulty;      //counting time
-         if(fruitWorth>10) {   //depreciation of apple's worth over time
+         ms += difficulty;      //counting time
+         if(fruitWorth > 10) {   //depreciation of apple's worth over time
             fruitWorth-=1;
          }
          repaint();  //update graphics every "difficulty" milliseconds
@@ -209,20 +214,22 @@ public class SnakePanel extends JPanel
 
    public void moveSnake(int x, int y, Graphics g) {
       if(ms > difficulty) { //only move after game has started - no preemptive moving
-         if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) {   //snake eats apple
+         //snake eats apple
+         if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { 
+            effectPlayer.play(audioBite1);
             fruits++;
             score += fruitWorth;    //25*25-6=619, tiers of worth after 50, 100, 150, etc.
-            if(fruits>50) {
-               fruitWorth = (fruits/50)*50+100;
+            if(fruits > 50) {
+               fruitWorth = (fruits / 50) * 50 + 100;
             } else {
                fruitWorth = 100;
             }
             spencer.move(x, y, true);  //grow
             apple = new Apple(spencer);
          } else {
-            if(hitWall(spencer.head.xcor+x,spencer.head.ycor+y)) {  //wall check
+            if(hitWall(spencer.head.xcor + x,spencer.head.ycor + y)) {  //wall check
                endGame();
-            } else if(spencer.ateSelf(x, y) == true && ms > 2*difficulty) { //self check, 2x bc 1x is first move
+            } else if(spencer.ateSelf(x, y) == true && ms > 2 * difficulty) { //self check, 2x bc 1x is first move
                endGame();
             } else {
                spencer.move(x, y, false); //move
@@ -297,11 +304,11 @@ public class SnakePanel extends JPanel
 
       g.setColor(Color.white);
       g.setFont(new Font(myFont2, Font.PLAIN, 18));
-      g.drawString("Score:" + score, 530, 120);
-      g.drawString("Fruits Eaten:" + fruits, 530, 150);
-      g.drawString("Fruit Value:" + fruitWorth, 530, 180);
-      g.drawString("Time:" + deci.format((double)ms/1000), 530, 210);
-      g.drawString("High Score:" + high, 530, 240);
+      g.drawString("Score: " + score, 530, 120);
+      g.drawString("Fruits: " + fruits, 530, 150);
+      g.drawString("Value: " + fruitWorth, 530, 180);
+      g.drawString("Time: " + deci.format((double)ms/1000), 530, 210);
+      g.drawString("High Score: " + high, 530, 240);
 
       g.drawString("Up/W", 530, 330);
       g.drawString("Down/S", 530, 360);
@@ -310,7 +317,7 @@ public class SnakePanel extends JPanel
       g.drawString("Pause:P", 530, 450);
       g.setFont(new Font(myFont, Font.PLAIN, 18));
       g.drawString("Controls :", 530, 300);
-      g.drawString("Difficulty :", 660, 300);
+      g.drawString("Difficulty :", 670, 300);
 
       if(startScreen == true) { //start screen
          g.setColor(Color.cyan);
@@ -363,9 +370,9 @@ public class SnakePanel extends JPanel
             g.setColor(Color.orange);
             g.drawString("NEW HIGH SCORE !", 60, 180);
             g.setColor(Color.red);
-            g.drawString("GAME OVER", 120, 255);
+            g.drawString("GAME OVER", 125, 255);
             g.setFont(new Font(myFont, Font.PLAIN, 35));
-            g.drawString("Press Enter to Restart", 45, 330);
+            g.drawString("Press Enter to Restart", 55, 330);
          } else {
             g.setColor(Color.red);
             g.setFont(new Font(myFont, Font.BOLD, 38));
@@ -422,15 +429,19 @@ public class SnakePanel extends JPanel
       apple = new Apple(spencer);
       buttonsOff();
       startTimer();
-      player.play(audioFilePath);
+      if(losePlayer.hasClip() == true)
+         losePlayer.stop();
+      musicPlayer.play(audioFilePath);
+      musicPlayer.loop();
    }
 
    public void endGame() {
       timer.stop();
-      player.stop();
+      musicPlayer.stop();
+      losePlayer.play(audioLose);
       isPlaying = false;
 
-      if(score>high) {   
+      if(score > high) {   
          PrintStream outfile = null;
          try {
             outfile = new PrintStream(new FileOutputStream(("snakeScore.txt")));
@@ -440,7 +451,7 @@ public class SnakePanel extends JPanel
             }
          outfile.println(score);
          outfile.println(fruits);
-         outfile.println(deci.format((double)ms/1000));
+         outfile.println(deci.format((double) ms / 1000));
          outfile.close();
       }
    }

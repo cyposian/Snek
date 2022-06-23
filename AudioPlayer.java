@@ -22,22 +22,29 @@ public class AudioPlayer implements LineListener {
             DataLine.Info info = new DataLine.Info(Clip.class, format);
             audioClip = (Clip) AudioSystem.getLine(info);
             audioClip.open(audioStream);
-            audioClip.loop(Clip.LOOP_CONTINUOUSLY);
-
+            
             audioClip.start();
-            } catch (UnsupportedAudioFileException ex) {
-               System.out.println("The specified audio file is not supported.");
-               ex.printStackTrace();
-            } catch (LineUnavailableException ex) {
-               System.out.println("Audio line for playing back is unavailable");
-               ex.printStackTrace();
-            } catch (IOException ex) {
-               System.out.println("Error playing the audio file.");
-               ex.printStackTrace();
-            }
+        } catch (UnsupportedAudioFileException ex) {
+            System.out.println("The specified audio file is not supported.");
+            ex.printStackTrace();
+        } catch (LineUnavailableException ex) {
+            System.out.println("Audio line for playing back is unavailable");
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            System.out.println("Error playing the audio file.");
+            ex.printStackTrace();
+        }
+    }
+    public void loop(){
+        audioClip.loop(Clip.LOOP_CONTINUOUSLY);
     }
     public void stop() {
         audioClip.stop();
+    }
+    public boolean hasClip() {
+        if(audioClip != null)
+            return true;
+        return false;
     }
     @Override
     public void update(LineEvent event) {
