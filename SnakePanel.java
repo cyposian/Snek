@@ -57,7 +57,7 @@ public class SnakePanel extends JPanel
 
       //feature add 1: size scalability - drag compatibility
       //feature add 2: custom m x n grid
-      //feature add 3: obstacles in map
+      //feature add 3: obstacles in map?
       //feature add 4: sound effects on eating apple or losing
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
