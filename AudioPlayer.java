@@ -39,6 +39,9 @@ public class AudioPlayer implements LineListener {
         }
         audioClip.start();
     }
+    void resume() {
+        audioClip.start();
+    }
     public void loop() {
         audioClip.loop(Clip.LOOP_CONTINUOUSLY);
     }

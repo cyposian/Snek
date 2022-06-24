@@ -20,8 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-//Sound from Zapsplat.com - apple bite noises
-
 public class SnakePanel extends JPanel
 {
    private BufferedImage myImage;
@@ -62,8 +60,8 @@ public class SnakePanel extends JPanel
       //feature add 3: obstacles in map?
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
-      audioBite1 = "./media/Apple Bite 2.wav";
-      audioLose = "./media/lose 1.wav";
+      audioBite1 = "./media/Apple Bite 2.wav";  //Sound from Zapsplat.com
+      audioLose = "./media/lose 1.wav";   //Sound from Zapsplat.com
       musicPlayer = new AudioPlayer(audioFilePath);
       effectPlayer = new AudioPlayer(audioBite1);
       losePlayer = new AudioPlayer(audioLose);
@@ -402,11 +400,15 @@ public class SnakePanel extends JPanel
             keyDown = keyLeft = keyUp = false;
          }
          if(e.getKeyCode() == KeyEvent.VK_P && timer != null) {   //pausing game
-            if(timer.isRunning())
+            if(timer.isRunning()) {
                timer.stop();
-            else
+               musicPlayer.stop();
+            }
+            else {
                if(isPlaying)
                   timer.start();
+                  musicPlayer.resume();
+            }
          }
          if(isPlaying == false) {    //restarting or exiting game
             if(e.getKeyCode() == KeyEvent.VK_ENTER) {
