@@ -64,9 +64,9 @@ public class SnakePanel extends JPanel
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav";
       audioBite1 = "./media/Apple Bite 2.wav";
       audioLose = "./media/lose 1.wav";
-      musicPlayer = new AudioPlayer();
-      effectPlayer = new AudioPlayer();
-      losePlayer = new AudioPlayer();
+      musicPlayer = new AudioPlayer(audioFilePath);
+      effectPlayer = new AudioPlayer(audioBite1);
+      losePlayer = new AudioPlayer(audioLose);
 
       //alternative way to access img in diff folder:
       // URL urlToImg = this.getClass().getResource("/media/snail.png"); 
@@ -216,7 +216,7 @@ public class SnakePanel extends JPanel
       if(ms > difficulty) { //only move after game has started - no preemptive moving
          //snake eats apple
          if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { 
-            effectPlayer.play(audioBite1);
+            effectPlayer.play();
             fruits++;
             score += fruitWorth;    //25*25-6=619, tiers of worth after 50, 100, 150, etc.
             if(fruits > 50) {
@@ -431,14 +431,14 @@ public class SnakePanel extends JPanel
       startTimer();
       if(losePlayer.hasClip() == true)
          losePlayer.stop();
-      musicPlayer.play(audioFilePath);
+      musicPlayer.play();
       musicPlayer.loop();
    }
 
    public void endGame() {
       timer.stop();
       musicPlayer.stop();
-      losePlayer.play(audioLose);
+      losePlayer.play();
       isPlaying = false;
 
       if(score > high) {   

@@ -13,19 +13,15 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class AudioPlayer implements LineListener {
     boolean playCompleted;
     Clip audioClip;
-    void play(String audioFilePath){
+    public AudioPlayer(String audioFilePath) {
         File audiofile = new File(audioFilePath);
 
         try{
-            System.out.println("Preparing to play");
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audiofile);
             AudioFormat format = audioStream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
             audioClip = (Clip) AudioSystem.getLine(info);
             audioClip.open(audioStream);
-            
-            audioClip.start();
-            System.out.println("Playing");
         } catch (UnsupportedAudioFileException ex) {
             System.out.println("The specified audio file is not supported.");
             ex.printStackTrace();
@@ -37,7 +33,13 @@ public class AudioPlayer implements LineListener {
             ex.printStackTrace();
         }
     }
-    public void loop(){
+    void play() {
+        if(audioClip.getMicrosecondLength() != 0) {
+            audioClip.setMicrosecondPosition(0);
+        }
+        audioClip.start();
+    }
+    public void loop() {
         audioClip.loop(Clip.LOOP_CONTINUOUSLY);
     }
     public void stop() {
