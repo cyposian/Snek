@@ -152,7 +152,6 @@ public class SnakePanel extends JPanel
 
       deci = new DecimalFormat("0.00");
       spencer = new Snake(startPos, snakeLength);
-      apple = new Apple(spencer);
 
       addKeyListener(new Key());
       setFocusable(true);
@@ -211,7 +210,7 @@ public class SnakePanel extends JPanel
    }
 
    public void moveSnake(int x, int y, Graphics g) {
-      if(ms > difficulty) { //only move after game has started - no preemptive moving
+      if(ms > difficulty) { //only move after game has started
          //snake eats apple
          if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { 
             effectPlayer.play();
@@ -236,7 +235,8 @@ public class SnakePanel extends JPanel
       }
       
       g.setColor(Color.red); //draw Apple
-      g.fillOval(apple.getxcor(), apple.getycor(), 20, 20);
+      if(apple != null)
+         g.fillOval(apple.getxcor(), apple.getycor(), 20, 20);
 
       drawSnake(g);
    }
@@ -318,11 +318,11 @@ public class SnakePanel extends JPanel
       g.drawString("Difficulty :", 670, 300);
 
       if(startScreen == true) { //start screen
+         startScreen = false;
          g.setColor(Color.cyan);
          g.setFont(new Font(myFont, Font.PLAIN, 35));
          g.drawString("Select a difficulty", 95, 225);
          g.drawString("to start", 185, 295);
-         
          drawSnake(g);
          return;
       }
@@ -368,9 +368,9 @@ public class SnakePanel extends JPanel
             g.setColor(Color.orange);
             g.drawString("NEW HIGH SCORE !", 60, 180);
             g.setColor(Color.red);
-            g.drawString("GAME OVER", 125, 255);
+            g.drawString("GAME OVER", 130, 255);
             g.setFont(new Font(myFont, Font.PLAIN, 35));
-            g.drawString("Press Enter to Restart", 55, 330);
+            g.drawString("Press Enter to Restart", 50, 330);
          } else {
             g.setColor(Color.red);
             g.setFont(new Font(myFont, Font.BOLD, 38));
@@ -423,7 +423,6 @@ public class SnakePanel extends JPanel
 
    public void newGame() {
       score = ms = fruits = direction = 0;
-      startScreen = false;
       fruitWorth = 100;        
       keyUp = isPlaying = true;
       keyDown = keyRight = keyLeft = false;
