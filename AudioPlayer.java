@@ -61,7 +61,7 @@ public class AudioPlayer implements LineListener {
         return audioClip.isRunning();
     }
 
-    void resume() {
+    public void resume() {
         audioClip.start();
     }
 
