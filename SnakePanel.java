@@ -20,11 +20,10 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-public class SnakePanel extends JPanel
-{
+public class SnakePanel extends JPanel {
    private BufferedImage myImage;
-   private boolean keyUp,keyDown,keyLeft,keyRight,isPlaying,startScreen;
-   private int startPos,snakeLength,high,fruits,fruitWorth,score,ms,direction,cells,cellWidth,difficulty;
+   private boolean keyUp, keyDown, keyLeft, keyRight, isPlaying, startScreen;
+   private int startPos, snakeLength, high, fruits, fruitWorth, score, ms, direction, cells, cellWidth, difficulty;
    private Snake spencer;
    private Apple apple;
    private DecimalFormat deci;
@@ -35,8 +34,7 @@ public class SnakePanel extends JPanel
    private AudioPlayer musicPlayer, effectPlayer, losePlayer;
    private String audioFilePath, audioBite1, audioLose, myFont, myFont2;
    
-   public SnakePanel()
-   {
+   public SnakePanel() {
       this.setLayout(null);
       myImage = new BufferedImage(825, 541, BufferedImage.TYPE_INT_RGB); //size doesn't matter?
       myFont = "Proxon"; //Headers font
@@ -197,7 +195,7 @@ public class SnakePanel extends JPanel
       public void actionPerformed(ActionEvent e) {
          ms += difficulty;      //counting time
          if(fruitWorth > 10) {   //depreciation of apple's worth over time
-            fruitWorth-=1;
+            fruitWorth -= 1;
          }
          repaint();  //update graphics every "difficulty" milliseconds
       }
@@ -288,7 +286,7 @@ public class SnakePanel extends JPanel
    }
    
    public void paintComponent(Graphics g) { 
-      g.drawImage(myImage, 0, 0, getWidth(), getHeight(), null);
+      g.drawImage(myImage, 0, 0, getWidth(), getHeight(), null);  //drawing blank bg to hold all drawings
 
       for (int y = 1; y < cellWidth * cells; y += cellWidth) {   //draw grid
          for (int x = 1; x < cellWidth * cells; x += cellWidth) {
@@ -305,7 +303,7 @@ public class SnakePanel extends JPanel
       g.drawString("Score: " + score, 530, 120);
       g.drawString("Fruits: " + fruits, 530, 150);
       g.drawString("Value: " + fruitWorth, 530, 180);
-      g.drawString("Time: " + deci.format((double)ms/1000), 530, 210);
+      g.drawString("Time: " + deci.format((double) ms / 1000), 530, 210);
       g.drawString("High Score: " + high, 530, 240);
 
       g.drawString("Up/W", 530, 330);
@@ -318,13 +316,11 @@ public class SnakePanel extends JPanel
       g.drawString("Difficulty :", 670, 300);
 
       if(startScreen == true) { //start screen
-         startScreen = false;
          g.setColor(Color.cyan);
          g.setFont(new Font(myFont, Font.PLAIN, 35));
          g.drawString("Select a difficulty", 95, 225);
          g.drawString("to start", 185, 295);
-         drawSnake(g);
-         return;
+         return;  //delete return if you want to see snake head at start
       }
       
       if(keyDown) {   //going down (2), can't up (0)
@@ -405,9 +401,10 @@ public class SnakePanel extends JPanel
                musicPlayer.stop();
             }
             else {
-               if(isPlaying)
+               if(isPlaying) {
                   timer.start();
                   musicPlayer.resume();
+               }
             }
          }
          if(isPlaying == false) {    //restarting or exiting game
@@ -424,6 +421,7 @@ public class SnakePanel extends JPanel
    public void newGame() {
       score = ms = fruits = direction = 0;
       fruitWorth = 100;        
+      startScreen = false;
       keyUp = isPlaying = true;
       keyDown = keyRight = keyLeft = false;
       spencer = new Snake(startPos, snakeLength);
@@ -441,6 +439,7 @@ public class SnakePanel extends JPanel
       musicPlayer.stop();
       losePlayer.play();
       isPlaying = false;
+      startScreen = false;
 
       if(score > high) {   
          PrintStream outfile = null;
