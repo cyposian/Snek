@@ -224,7 +224,7 @@ public class SnakePanel extends JPanel implements Runnable {
    }
    
    public void paintComponent(Graphics g) { 
-      super.paintComponent(g);
+      //super.paintComponent(g); // only needed if the entire bg is not painted
 
       g.drawImage(myImage, 0, 0, getWidth(), getHeight(), null);
 

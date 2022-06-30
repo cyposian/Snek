@@ -14,8 +14,8 @@ public class SidePanel {
         deci = SnakePanel.deci;
     }
 
-    public void draw(Graphics g) {
-        g.setColor(Color.yellow);  //draw right panel
+    public void draw(Graphics g) { // draw main panel
+        g.setColor(Color.yellow);
         g.setFont(new Font(myFont, Font.BOLD, 30));;
         g.drawString("Snek", 620, 80);
   

@@ -8,9 +8,9 @@ public class Apple {
 
    public Apple(Snake s) {
       do{
-         appleX = randomLocation(); //random location inside grid boundaries
+         appleX = randomLocation(); // random location inside grid boundaries
          appleY = randomLocation();
-         } while(inSnake(s, appleX, appleY)); //not spawn in snake
+         } while(inSnake(s, appleX, appleY)); // not spawn in snake
       xcor = appleX;
       ycor = appleY;
    }
