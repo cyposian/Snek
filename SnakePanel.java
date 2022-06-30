@@ -185,7 +185,7 @@ public class SnakePanel extends JPanel implements Runnable {
    public void update() {
       ms += 1000 / difficulty; // incrementing time stat
 
-      if(fruitWorth > 50) {   // depreciation of apple's worth over time
+      if(fruitWorth > (50 + (fruits / 10) * 10)) {   // depreciation of apple's worth over time, w floor scaling w fruits eaten
          fruitWorth -= 1;
       }
 
@@ -253,10 +253,10 @@ public class SnakePanel extends JPanel implements Runnable {
    public void moveSnake(int x, int y) {
       if(ms > (1000 / difficulty)) { // only move after game has started
          if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { // snake eats apple
-            effectPlayer.play();
+            effectPlayer.playOnSeparateThread();
             fruits++;
             score += fruitWorth;
-            fruitWorth = 100 + (fruits % 25) * 25; // fruitWorth scales as you eat more
+            fruitWorth = 100 + (fruits / 10) * 10; // fruitWorth scales as you eat more
             spencer.move(x, y, true);  // grow
             apple = new Apple(spencer);
          } else {
