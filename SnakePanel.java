@@ -1,5 +1,4 @@
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,36 +16,53 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.Timer;
 import javax.swing.border.Border;
 
-public class SnakePanel extends JPanel {
+public class SnakePanel extends JPanel implements Runnable {
    private BufferedImage myImage;
-   private boolean keyUp, keyDown, keyLeft, keyRight, isPlaying, startScreen;
-   private int startPos, snakeLength, high, fruits, fruitWorth, score, ms, direction, cells, cellWidth, difficulty;
+   private boolean isPaused, isPlaying, startScreen, keyUp, keyDown, keyLeft, keyRight;
+   private int startPos, snakeLength, cells, cellWidth, difficulty;
+   public static int direction, score, high, fruits, fruitWorth, ms;
    private Snake spencer;
    private Apple apple;
-   private DecimalFormat deci;
+   public static DecimalFormat deci;
    private Border defaultBorder;
-   private Timer timer;
    private Scanner infile;
    private JButton speed1, speed2, speed3, speed4, speed5, speed6;
    private AudioPlayer musicPlayer, effectPlayer, losePlayer;
-   private String audioFilePath, audioBite1, audioLose, myFont, myFont2;
+   private String audioFilePath, audioBite1, audioLose;
+   public static String myFont, myFont2;
+   Thread gameThread;
+   SidePanel sidePanel;
    
    public SnakePanel() {
       this.setLayout(null);
+      this.setDoubleBuffered(true);
+      this.addKeyListener(new KeyHandler());
+      this.setFocusable(true);
       myImage = new BufferedImage(825, 541, BufferedImage.TYPE_INT_RGB); //size doesn't matter?
       myFont = "Proxon"; //Headers font
       myFont2 = "Monospaced"; //Body font
-      keyUp = isPlaying = startScreen = true;    //starts game moving upwards
-      keyDown = keyLeft = keyRight = false;
+      keyUp = startScreen = true;    //starts game moving upwards
+      keyDown = keyLeft = keyRight = isPaused = isPlaying = false;
       fruits = score = direction = 0;  //direction: 0 = up, 1 = right, 2 = down, 3 = left
       fruitWorth = 100; 
       snakeLength = 6;
+      difficulty = 1000;
       cells = 25;    //# of cells in grid
       cellWidth = 20;   //dimension of cell
       startPos = 1 + (cells / 2) * cellWidth;   //starting position is center of grid
+      deci = new DecimalFormat("0.00");
+      spencer = new Snake(startPos, snakeLength);
+      sidePanel = new SidePanel();
+
+      try {
+         infile = new Scanner(new File("snakeScore.txt"));   		
+      } catch(FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null,"snakeScore.txt could not be found.");
+            System.exit(0);
+      }
+      high = infile.nextInt();
 
       //Challenge: create an algorithm that beats SNEK (most efficient path while surviving)
       //based on cur pos & apple pos, finds optimal path ONCE, store solution in data structure,
@@ -72,7 +88,7 @@ public class SnakePanel extends JPanel {
       defaultBorder = speed1.getBorder(); //save default border look
       speed1.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
-            difficulty = 200;
+            difficulty = 4;
             newGame();
             defaultBorders();
             speed1.setBorder(BorderFactory.createLineBorder(Color.green, 3));
@@ -84,7 +100,7 @@ public class SnakePanel extends JPanel {
       speed2.setBounds(695, 320, 45, 45);
       speed2.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
-            difficulty = 150;
+            difficulty = 6;
             newGame();
             defaultBorders();
             speed2.setBorder(BorderFactory.createLineBorder(Color.green, 3));
@@ -96,7 +112,7 @@ public class SnakePanel extends JPanel {
       speed3.setBounds(750, 320, 45, 45);
       speed3.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
-            difficulty = 100;
+            difficulty = 10;
             newGame();
             defaultBorders();
             speed3.setBorder(BorderFactory.createLineBorder(Color.green, 3));
@@ -108,7 +124,7 @@ public class SnakePanel extends JPanel {
       speed4.setBounds(640, 375, 45, 45);
       speed4.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
-            difficulty = 75;
+            difficulty = 15;
             newGame();
             defaultBorders();
             speed4.setBorder(BorderFactory.createLineBorder(Color.green, 3));
@@ -120,7 +136,7 @@ public class SnakePanel extends JPanel {
       speed5.setBounds(695, 375, 45, 45);
       speed5.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
-            difficulty = 50;
+            difficulty = 20;
             newGame();
             defaultBorders();
             speed5.setBorder(BorderFactory.createLineBorder(Color.green, 3));
@@ -132,27 +148,181 @@ public class SnakePanel extends JPanel {
       speed6.setBounds(750, 375, 45, 45);
       speed6.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
-            difficulty = 25;
+            difficulty = 40;  //40 fps
             newGame();
             defaultBorders();
             speed6.setBorder(BorderFactory.createLineBorder(Color.green, 3));
          }
       });
       add(speed6);
-      
-      try {
-         infile = new Scanner(new File("snakeScore.txt"));   		
-      } catch(FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null,"snakeScore.txt could not be found.");
-            System.exit(0);
+   }
+
+   public void startGameThread() {
+      gameThread = new Thread(this);
+      gameThread.start();
+   }
+
+   @Override
+   public void run() {
+      //int beepCount = 0;
+      double delta = 0;
+      long lastTime = System.nanoTime(); // 1 nanosec = 10^-9 second
+      long currentTime;
+
+      while(gameThread != null) {
+         if(isPlaying && !isPaused) {
+            double drawInterval = 1000000000/difficulty; // difficulty dictates FPS
+            currentTime = System.nanoTime();
+            delta += (currentTime - lastTime) / drawInterval; 
+            lastTime = currentTime;
+            if(delta >= 1) {  
+               update();
+               repaint();
+               delta--;
+               System.out.println("delta decremented");
+               /* beepCount++;
+               if(beepCount>9)
+                  beepCount = 0;
+               System.out.print(beepCount + " "); */
+               /* if(beepCount % 30 == 0) {  //no delay b/w sound and print!!!
+                  System.out.println("beep went off");
+                  effectPlayer.play();
+                */
+            }
+         }
       }
-      high = infile.nextInt();
+   }
 
-      deci = new DecimalFormat("0.00");
+   public void update() {
+      if(isPlaying && !startScreen) {  // incrementing time stat
+         ms += 1000/difficulty; // fixxxxxxxxxxxxxxxxxxx
+      }
+
+      if(fruitWorth > 10) {   // depreciation of apple's worth over time
+         fruitWorth -= 1;
+      }
+
+      if(keyDown) {   //going down (2), can't up (0)
+         if(direction == 0) {
+            moveSnake(0, -20);
+            } else {
+               direction = 2;
+               moveSnake(0, 20);
+            }
+         }
+      if(keyUp) {  //going up (0), can't down (2)
+         if(direction == 2) { //if going down, continue going down
+            moveSnake(0, 20);
+         } else {
+            direction = 0;
+            moveSnake(0, -20);
+         }   
+      }
+      if(keyLeft) { //going left (3), can't right (1)
+         if(direction == 1) {
+               moveSnake(20, 0);
+            } else {
+               direction = 3;
+               moveSnake(-20, 0);
+            }
+      }
+      if(keyRight) { //going right (1), can't left (3)
+        if(direction == 3) {
+            moveSnake(-20, 0);
+         } else {
+            direction = 1;
+            moveSnake(20, 0);
+         }
+      }  
+   }
+   
+   public void paintComponent(Graphics g) { 
+      super.paintComponent(g);
+
+      g.drawImage(myImage, 0, 0, getWidth(), getHeight(), null);  //drawing blank bg to hold all drawings
+
+      for (int y = 1; y < cellWidth * cells; y += cellWidth) {   //draw grid
+         for (int x = 1; x < cellWidth * cells; x += cellWidth) {
+            g.drawRect(x, y, cellWidth, cellWidth);
+         }
+      }      
+
+     sidePanel.draw(g); //main panel
+      
+      if(startScreen == true) { //start screen
+         sidePanel.drawStartScreen(g);
+         return;  //delete return if you want to see snake head at start
+      }
+
+      spencer.drawSnake(g);
+      apple.drawApple(g);
+
+      if(isPlaying == false) {   //end screen
+         sidePanel.drawEndScreen(g);
+         buttonsOn();
+      }
+   }
+
+   public void moveSnake(int x, int y) {
+      if(ms > difficulty) { //only move after game has started FIXXXXXXXXXXXXXXXXXXXXXXX
+         //snake eats apple
+         if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { 
+            effectPlayer.play();
+            fruits++;
+            score += fruitWorth;    //25*25-6=619, tiers of worth after 50, 100, 150, etc.
+            if(fruits > 50) {
+               fruitWorth = (fruits / 50) * 50 + 100;
+            } else {
+               fruitWorth = 100;
+            }
+            spencer.move(x, y, true);  //grow
+            apple = new Apple(spencer);
+         } else {
+            if(spencer.head.xcor + x < 0 || spencer.head.xcor + x > 481 || spencer.head.ycor + y < 0 || spencer.head.ycor + y > 481) { //wall check, recode max?
+               endGame();
+            } else if(spencer.ateSelf(x, y) == true && ms > 2 * difficulty) { //self check, 2x bc 1x is first move FIXXXXXXXXXXXXX
+               endGame();
+            } else {
+               spencer.move(x, y, false); //move
+            }
+         }
+      }
+   }
+
+   public void newGame() {
+      score = ms = fruits = direction = 0;
+      fruitWorth = 100;        
+      startScreen = isPaused = false;
+      isPlaying = true;
+      keyUp = isPlaying = true;
+      keyDown = keyRight = keyLeft = false;
       spencer = new Snake(startPos, snakeLength);
+      apple = new Apple(spencer);
+      buttonsOff();
+      if(losePlayer.hasClip() == true)
+         losePlayer.stop();
+      musicPlayer.play();
+      musicPlayer.loop();
+   }
 
-      addKeyListener(new Key());
-      setFocusable(true);
+   public void endGame() {
+      musicPlayer.stop();
+      losePlayer.play();
+      isPlaying = false;
+
+      if(score > high) {   
+         PrintStream outfile = null;
+         try {
+            outfile = new PrintStream(new FileOutputStream(("snakeScore.txt")));
+         }
+            catch(FileNotFoundException f) {
+               JOptionPane.showMessageDialog(null,"The file could not be created.");
+            }
+         outfile.println(score);
+         outfile.println(fruits);
+         outfile.println(deci.format((double) ms / 1000));
+         outfile.close();
+      }
    }
 
    public void buttonsOff() {
@@ -181,203 +351,8 @@ public class SnakePanel extends JPanel {
       speed5.setBorder(BorderFactory.createTitledBorder(defaultBorder));
       speed6.setBorder(BorderFactory.createTitledBorder(defaultBorder));   
    }
-   
-   public void startTimer() {
-      if(timer == null || timer.getDelay() != difficulty){
-         timer = new Timer(difficulty, new Listener());
-         timer.start();
-      } else {
-         timer.restart();
-      }
-   }
 
-   public class Listener implements ActionListener {
-      public void actionPerformed(ActionEvent e) {
-         ms += difficulty;      //counting time
-         if(fruitWorth > 10) {   //depreciation of apple's worth over time
-            fruitWorth -= 1;
-         }
-         repaint();  //update graphics every "difficulty" milliseconds
-      }
-   }
-
-   public boolean hitWall(int x, int y) {
-      if(x < 0 || x > 481 || y < 0 || y > 481)
-         return true;
-      return false;
-   }
-
-   public void moveSnake(int x, int y, Graphics g) {
-      if(ms > difficulty) { //only move after game has started
-         //snake eats apple
-         if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { 
-            effectPlayer.play();
-            fruits++;
-            score += fruitWorth;    //25*25-6=619, tiers of worth after 50, 100, 150, etc.
-            if(fruits > 50) {
-               fruitWorth = (fruits / 50) * 50 + 100;
-            } else {
-               fruitWorth = 100;
-            }
-            spencer.move(x, y, true);  //grow
-            apple = new Apple(spencer);
-         } else {
-            if(hitWall(spencer.head.xcor + x,spencer.head.ycor + y)) {  //wall check
-               endGame();
-            } else if(spencer.ateSelf(x, y) == true && ms > 2 * difficulty) { //self check, 2x bc 1x is first move
-               endGame();
-            } else {
-               spencer.move(x, y, false); //move
-            }
-         }
-      }
-      
-      g.setColor(Color.red); //draw Apple
-      if(apple != null)
-         g.fillOval(apple.getxcor(), apple.getycor(), 20, 20);
-
-      drawSnake(g);
-   }
-
-   public void drawSnake(Graphics g) {
-      Snake.Node temp = spencer.head;
-      while(temp != null) { //draw snake body
-         g.setColor(Color.black);   //borders of segments
-         g.drawRect(temp.xcor, temp.ycor, 20, 20);
-         g.setColor(Color.green);   //body
-         g.fillRect(temp.xcor + 1, temp.ycor + 1, 19, 19);
-         temp = temp.next;
-      }
-
-      temp = spencer.head; //drawing eyes and tongue
-      if(direction == 0) { //up
-         g.setColor(Color.black);
-         g.fillRect(temp.xcor + 6, temp.ycor + 3, 1, 6);
-         g.fillRect(temp.xcor + 14, temp.ycor + 3, 1, 6);
-         g.setColor(Color.red);
-         g.drawLine(temp.xcor + 10, temp.ycor, temp.xcor + 10, temp.ycor - 3);
-         g.drawLine(temp.xcor + 10, temp.ycor - 3, temp.xcor + 8, temp.ycor - 5);
-         g.drawLine(temp.xcor + 10, temp.ycor - 3, temp.xcor + 12, temp.ycor - 5);
-      } else if(direction == 2) { //down
-         g.setColor(Color.black);
-         g.fillRect(temp.xcor + 6, temp.ycor + 11, 1, 6);
-         g.fillRect(temp.xcor + 14, temp.ycor + 11, 1, 6);
-         g.setColor(Color.red);
-         g.drawLine(temp.xcor + 10, temp.ycor + 20, temp.xcor + 10, temp.ycor + 23);
-         g.drawLine(temp.xcor + 10, temp.ycor + 23, temp.xcor + 8, temp.ycor + 25);
-         g.drawLine(temp.xcor + 10, temp.ycor + 23, temp.xcor + 12, temp.ycor + 25);
-      } else if(direction == 1) { //right
-         g.setColor(Color.black);
-         g.fillRect(temp.xcor + 11, temp.ycor + 6, 6, 1);
-         g.fillRect(temp.xcor + 11, temp.ycor + 14, 6, 1);
-         g.setColor(Color.red);
-         g.drawLine(temp.xcor + 20, temp.ycor + 10, temp.xcor + 23, temp.ycor + 10);
-         g.drawLine(temp.xcor + 23, temp.ycor + 10, temp.xcor + 25, temp.ycor + 8);
-         g.drawLine(temp.xcor + 23, temp.ycor + 10, temp.xcor + 25, temp.ycor + 12);
-      } else { //left
-         g.setColor(Color.black);
-         g.fillRect(temp.xcor + 3, temp.ycor + 6, 6, 1);
-         g.fillRect(temp.xcor + 3, temp.ycor + 14, 6, 1);
-         g.setColor(Color.red);
-         g.drawLine(temp.xcor, temp.ycor + 10, temp.xcor - 3, temp.ycor + 10);
-         g.drawLine(temp.xcor - 3, temp.ycor + 10, temp.xcor - 5, temp.ycor + 8);
-         g.drawLine(temp.xcor - 3, temp.ycor + 10, temp.xcor - 5, temp.ycor + 12);
-      }
-   }
-   
-   public void paintComponent(Graphics g) { 
-      g.drawImage(myImage, 0, 0, getWidth(), getHeight(), null);  //drawing blank bg to hold all drawings
-
-      for (int y = 1; y < cellWidth * cells; y += cellWidth) {   //draw grid
-         for (int x = 1; x < cellWidth * cells; x += cellWidth) {
-            g.drawRect(x, y, cellWidth, cellWidth);
-         }
-      }      
-
-      g.setColor(Color.yellow);  //draw right panel
-      g.setFont(new Font(myFont, Font.BOLD, 30));;
-      g.drawString("Snek", 620, 80);
-
-      g.setColor(Color.white);
-      g.setFont(new Font(myFont2, Font.PLAIN, 18));
-      g.drawString("Score: " + score, 530, 120);
-      g.drawString("Fruits: " + fruits, 530, 150);
-      g.drawString("Value: " + fruitWorth, 530, 180);
-      g.drawString("Time: " + deci.format((double) ms / 1000), 530, 210);
-      g.drawString("High Score: " + high, 530, 240);
-
-      g.drawString("Up/W", 530, 330);
-      g.drawString("Down/S", 530, 360);
-      g.drawString("Left/A", 530, 390);
-      g.drawString("Right/D", 530, 420);
-      g.drawString("Pause:P", 530, 450);
-      g.setFont(new Font(myFont, Font.PLAIN, 18));
-      g.drawString("Controls :", 530, 300);
-      g.drawString("Difficulty :", 670, 300);
-
-      if(startScreen == true) { //start screen
-         g.setColor(Color.cyan);
-         g.setFont(new Font(myFont, Font.PLAIN, 35));
-         g.drawString("Select a difficulty", 95, 225);
-         g.drawString("to start", 185, 295);
-         return;  //delete return if you want to see snake head at start
-      }
-      
-      if(keyDown) {   //going down (2), can't up (0)
-         if(direction == 0) {
-            moveSnake(0, -20, g);
-            } else {
-               direction = 2;
-               moveSnake(0, 20, g);
-            }
-         }
-      if(keyUp) {  //going up (0), can't down (2)
-         if(direction == 2) {
-            moveSnake(0, 20, g);
-         } else {
-            direction = 0;
-            moveSnake(0, -20, g);
-         }   
-      }
-      if(keyLeft) { //going left (3), can't right (1)
-         if(direction == 1) {
-               moveSnake(20, 0, g);
-            } else {
-               direction = 3;
-               moveSnake(-20, 0, g);
-            }
-      }
-      if(keyRight) { //going right (1), can't left (3)
-        if(direction == 3) {
-            moveSnake(-20, 0, g);
-         } else {
-            direction = 1;
-            moveSnake(20, 0, g);
-         }
-      }
-
-      if(isPlaying == false) {   //end screen
-         buttonsOn();
-         if(score > high) {
-            high = score;
-            g.setFont(new Font(myFont, Font.BOLD, 40));
-            g.setColor(Color.orange);
-            g.drawString("NEW HIGH SCORE !", 60, 180);
-            g.setColor(Color.red);
-            g.drawString("GAME OVER", 130, 255);
-            g.setFont(new Font(myFont, Font.PLAIN, 35));
-            g.drawString("Press Enter to Restart", 50, 330);
-         } else {
-            g.setColor(Color.red);
-            g.setFont(new Font(myFont, Font.BOLD, 38));
-            g.drawString("GAME OVER", 135, 200);
-            g.setFont(new Font(myFont, Font.PLAIN, 35));
-            g.drawString("Press Enter to Restart", 45, 275);
-         }
-      }
-   }
-
-   public class Key extends KeyAdapter {
+   public class KeyHandler extends KeyAdapter {
       public void keyPressed(KeyEvent e) {
          if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {  
             keyUp = true;
@@ -395,15 +370,15 @@ public class SnakePanel extends JPanel {
             keyRight = true;
             keyDown = keyLeft = keyUp = false;
          }
-         if(e.getKeyCode() == KeyEvent.VK_P && timer != null) {   //pausing game
-            if(timer.isRunning()) {
-               timer.stop();
-               musicPlayer.stop();
-            }
-            else {
-               if(isPlaying) {
-                  timer.start();
+         if(e.getKeyCode() == KeyEvent.VK_P) {   //pausing game
+            if(isPlaying) {
+               if(isPaused) {
                   musicPlayer.resume();
+                  isPaused = false;
+               }
+               else {
+                  musicPlayer.stop();
+                  isPaused = true;
                }
             }
          }
@@ -415,44 +390,6 @@ public class SnakePanel extends JPanel {
                System.exit(0);
             }
          }
-      }
-   }
-
-   public void newGame() {
-      score = ms = fruits = direction = 0;
-      fruitWorth = 100;        
-      startScreen = false;
-      keyUp = isPlaying = true;
-      keyDown = keyRight = keyLeft = false;
-      spencer = new Snake(startPos, snakeLength);
-      apple = new Apple(spencer);
-      buttonsOff();
-      startTimer();
-      if(losePlayer.hasClip() == true)
-         losePlayer.stop();
-      musicPlayer.play();
-      musicPlayer.loop();
-   }
-
-   public void endGame() {
-      timer.stop();
-      musicPlayer.stop();
-      losePlayer.play();
-      isPlaying = false;
-      startScreen = false;
-
-      if(score > high) {   
-         PrintStream outfile = null;
-         try {
-            outfile = new PrintStream(new FileOutputStream(("snakeScore.txt")));
-         }
-            catch(FileNotFoundException f) {
-               JOptionPane.showMessageDialog(null,"The file could not be created.");
-            }
-         outfile.println(score);
-         outfile.println(fruits);
-         outfile.println(deci.format((double) ms / 1000));
-         outfile.close();
       }
    }
 }
