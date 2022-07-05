@@ -20,7 +20,7 @@ public class AudioPlayer implements LineListener {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audiofile);
             AudioFormat format = audioStream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
-            //control chunk size w buffer size arg; smaller buff size should equal less latency, but didn't rly notice
+            // control chunk size w buffer size arg; smaller buff size should equal less latency, but didn't rly notice
             audioClip = (Clip) AudioSystem.getLine(info);
             audioClip.open(audioStream);
         } catch (UnsupportedAudioFileException ex) {
@@ -45,7 +45,7 @@ public class AudioPlayer implements LineListener {
         //System.out.println("sound is playing on EDT: " + javax.swing.SwingUtilities.isEventDispatchThread()); //check if on EDT
     }
 
-    /*public void playOnSeparateThread() { //problem: 2nd sound eaten if eat two apples to quickly
+    public void playOnSeparateThread() { //problem: 2nd sound eaten if eat two apples to quickly
         Runnable runner = new Runnable() {
             public void run() {
                 play();
@@ -55,7 +55,7 @@ public class AudioPlayer implements LineListener {
         t.setPriority(8);   //apparently priority only takes effect if max thread capacity reached
         t.start();
         //(new Thread(runner)).start(); //alt way if don't need to call other methods on thread
-    }*/
+    }
 
     public boolean isRunning() {
         return audioClip.isRunning();
