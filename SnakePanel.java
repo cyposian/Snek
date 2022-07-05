@@ -33,8 +33,8 @@ public class SnakePanel extends JPanel implements Runnable {
    private Border defaultBorder;
    private Scanner infile;
    private JButton speed1, speed2, speed3, speed4, speed5, speed6;
-   private AudioPlayer musicPlayer, effectPlayer, losePlayer;
-   private String audioFilePath, audioBite1, audioLose;
+   private AudioPlayer musicPlayer, losePlayer; // effectPlayer
+   private String audioFilePath, audioLose; // audioBite1
    private SidePanel sidePanel;
    Thread gameThread;
    
@@ -72,10 +72,10 @@ public class SnakePanel extends JPanel implements Runnable {
       // feature add 3: obstacles in map?
 
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav"; // Music from freemusicarchive.org
-      audioBite1 = "./media/Apple Bite 2.wav";  // Sound from Zapsplat.com
+      //audioBite1 = "./media/Apple Bite 2.wav";  // Sound from Zapsplat.com
       audioLose = "./media/lose 1.wav";   // Sound from Zapsplat.com
       musicPlayer = new AudioPlayer(audioFilePath);
-      effectPlayer = new AudioPlayer(audioBite1);
+      //effectPlayer = new AudioPlayer(audioBite1);
       losePlayer = new AudioPlayer(audioLose);
 
       // alternative way to access img in diff folder:
@@ -253,7 +253,7 @@ public class SnakePanel extends JPanel implements Runnable {
    public void moveSnake(int x, int y) {
       if(ms > (1000 / difficulty)) { // only move after game has started
          if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { // snake eats apple
-            effectPlayer.playOnSeparateThread();
+            //effectPlayer.playOnSeparateThread();
             fruits++;
             score += fruitWorth;
             fruitWorth = 100 + (fruits / 10) * 10; // fruitWorth scales as you eat more
