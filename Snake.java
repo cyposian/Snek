@@ -63,7 +63,7 @@ public class Snake {
         if(!ateApple) { // only delete tail if haven't eaten apple
             deleteLast();
         }
-        push(head.xcor + x,head.ycor + y);
+        push(head.xcor + x, head.ycor + y);
     }
     public boolean ateSelf(int x, int y) {
         Node temp = head.next;

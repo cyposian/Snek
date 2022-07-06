@@ -10,7 +10,7 @@ public class Apple {
       do{
          appleX = randomLocation(); // random location inside grid boundaries
          appleY = randomLocation();
-         } while(inSnake(s, appleX, appleY)); // not spawn in snake
+         } while(inSnake(s, appleX, appleY)); // don't spawn in snake
       xcor = appleX;
       ycor = appleY;
    }
@@ -24,7 +24,7 @@ public class Apple {
    }
 
    public int randomLocation() {
-      return (int)Math.floor((Math.random()*25))*20+1;
+      return (int)Math.floor((Math.random() * 25)) * 20 + 1;
    }
 
    public boolean inSnake(Snake s, int x, int y) {

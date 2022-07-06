@@ -51,9 +51,9 @@ public class SidePanel {
             g.setColor(Color.orange);
             g.drawString("NEW HIGH SCORE !", 60, 180);
             g.setColor(Color.red);
-            g.drawString("GAME OVER", 130, 255);
+            g.drawString("GAME OVER", 135, 255);
             g.setFont(new Font(myFont, Font.PLAIN, 35));
-            g.drawString("Press Enter to Restart", 50, 330);
+            g.drawString("Press Enter to Restart", 55, 330);
          } else {
             g.setColor(Color.red);
             g.setFont(new Font(myFont, Font.BOLD, 38));

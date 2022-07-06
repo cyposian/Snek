@@ -16,11 +16,10 @@ public class AudioPlayer implements LineListener {
     public AudioPlayer(String audioFilePath) {
         File audiofile = new File(audioFilePath);
 
-        try{
+        try {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audiofile);
             AudioFormat format = audioStream.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, format);
-            // control chunk size w buffer size arg; smaller buff size should equal less latency, but didn't rly notice
+            DataLine.Info info = new DataLine.Info(Clip.class, format); // optional: add buffer chunk size
             audioClip = (Clip) AudioSystem.getLine(info);
             audioClip.open(audioStream);
         } catch (UnsupportedAudioFileException ex) {
@@ -36,29 +35,8 @@ public class AudioPlayer implements LineListener {
     }
 
     public void play() {
-        if(audioClip.getMicrosecondLength() != 0) {
-            audioClip.setMicrosecondPosition(0);
-        }
-        //audioClip.setMicrosecondPosition(10000);
+        audioClip.setFramePosition(0);
         audioClip.start();
-        //System.out.println(Thread.currentThread().getPriority());
-        //System.out.println("sound is playing on EDT: " + javax.swing.SwingUtilities.isEventDispatchThread()); //check if on EDT
-    }
-
-    public void playOnSeparateThread() { //problem: 2nd sound eaten if eat two apples to quickly
-        Runnable runner = new Runnable() {
-            public void run() {
-                play();
-            }
-        };
-        Thread t = new Thread(runner);
-        t.setPriority(8);   //apparently priority only takes effect if max thread capacity reached
-        t.start();
-        //(new Thread(runner)).start(); //alt way if don't need to call other methods on thread
-    }
-
-    public boolean isRunning() {
-        return audioClip.isRunning();
     }
 
     public void resume() {

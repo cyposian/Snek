@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -8,9 +9,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.Scanner;
+
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,8 +23,8 @@ import javax.swing.border.Border;
 
 public class SnakePanel extends JPanel implements Runnable {
    private final int snakeLength = 6; // initial length of Snake
-   private final int cells = 25; // # of cells in grid
-   private final int cellWidth = 20; // dimension of cell
+   private final int cells = 25;
+   private final int cellWidth = 20;
    public static int direction, score, high, fruits, fruitWorth, ms;
    public static DecimalFormat deci;
    public static String myFont, myFont2;
@@ -33,8 +36,8 @@ public class SnakePanel extends JPanel implements Runnable {
    private Border defaultBorder;
    private Scanner infile;
    private JButton speed1, speed2, speed3, speed4, speed5, speed6;
-   private AudioPlayer musicPlayer, losePlayer; // effectPlayer
-   private String audioFilePath, audioLose; // audioBite1
+   private AudioPlayer musicPlayer, effectPlayer, losePlayer;
+   private String audioFilePath, audioLose, audioBite1;
    private SidePanel sidePanel;
    Thread gameThread;
    
@@ -43,7 +46,7 @@ public class SnakePanel extends JPanel implements Runnable {
       this.setDoubleBuffered(true);
       this.addKeyListener(new KeyHandler());
       this.setFocusable(true);
-      myImage = new BufferedImage(825, 541, BufferedImage.TYPE_INT_RGB); // size doesn't matter?
+      myImage = new BufferedImage(825, 541, BufferedImage.TYPE_INT_RGB);
       myFont = "Proxon"; // Header font   // IMPORTING FONT IF NOT INSTALLED***
       myFont2 = "Monospaced"; // Body font
       startScreen = true;
@@ -54,6 +57,9 @@ public class SnakePanel extends JPanel implements Runnable {
       spencer = new Snake(startPos, snakeLength);
       sidePanel = new SidePanel();
 
+      InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("./proxon/PROXON.ttf")
+      Font font = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(48f)
+
       try {
          infile = new Scanner(new File("snakeScore.txt"));   		
       } catch(FileNotFoundException e) {
@@ -62,25 +68,13 @@ public class SnakePanel extends JPanel implements Runnable {
       }
       high = infile.nextInt();
 
-      // Challenge: create an algorithm that beats SNEK (most efficient path while surviving)
-      // based on cur pos & apple pos, finds optimal path ONCE, store solution in data structure,
-      // if not empty: follow solution
-      // hard part: optimal path algorithm - DFS, BFS, A*, greedy, etc.
-
-      // feature add 1: size scalability - drag compatibility
-      // feature add 2: custom m x n grid
-      // feature add 3: obstacles in map?
-
       audioFilePath = "./media/Serge Quadrado - Dramatic Piano.wav"; // Music from freemusicarchive.org
-      //audioBite1 = "./media/Apple Bite 2.wav";  // Sound from Zapsplat.com
+      audioBite1 = "./media/apple bite.wav";  // Sound from Zapsplat.com
       audioLose = "./media/lose 1.wav";   // Sound from Zapsplat.com
       musicPlayer = new AudioPlayer(audioFilePath);
-      //effectPlayer = new AudioPlayer(audioBite1);
+      effectPlayer = new AudioPlayer(audioBite1);
       losePlayer = new AudioPlayer(audioLose);
 
-      // alternative way to access img in diff folder:
-      // URL urlToImg = this.getClass().getResource("/media/snail.png"); 
-      // speed1 = new JButton(new ImageIcon(urlToImg));
       speed1 = new JButton(new ImageIcon("./media/snail.png"));
       speed1.setBounds(640, 320, 45, 45);
       defaultBorder = speed1.getBorder(); // save default border look
@@ -185,11 +179,11 @@ public class SnakePanel extends JPanel implements Runnable {
    public void update() {
       ms += 1000 / difficulty; // incrementing time stat
 
-      if(fruitWorth > (50 + (fruits / 10) * 10)) {   // depreciation of apple's worth over time, w floor scaling w fruits eaten
+      if(fruitWorth > (50 + (fruits / 10) * 10)) {   // depreciation of apple's worth over time; value floor scaling w fruits eaten
          fruitWorth -= 1;
       }
 
-      if(keyDown) {   // going down (2), can't up (0)
+      if(keyDown) {   // going down (2), can't go up (0)
          if(direction == 0) { // if going up, continue going up
             moveSnake(0, -20);
             } else {
@@ -197,7 +191,7 @@ public class SnakePanel extends JPanel implements Runnable {
                moveSnake(0, 20);
             }
          }
-      if(keyUp) {  // going up (0), can't down (2)
+      if(keyUp) {  // going up (0), can't go down (2)
          if(direction == 2) {
             moveSnake(0, 20);
          } else {
@@ -205,7 +199,7 @@ public class SnakePanel extends JPanel implements Runnable {
             moveSnake(0, -20);
          }   
       }
-      if(keyLeft) { // going left (3), can't right (1)
+      if(keyLeft) { // going left (3), can't go right (1)
          if(direction == 1) {
                moveSnake(20, 0);
             } else {
@@ -213,7 +207,7 @@ public class SnakePanel extends JPanel implements Runnable {
                moveSnake(-20, 0);
             }
       }
-      if(keyRight) { // going right (1), can't left (3)
+      if(keyRight) { // going right (1), can't go left (3)
         if(direction == 3) {
             moveSnake(-20, 0);
          } else {
@@ -224,8 +218,6 @@ public class SnakePanel extends JPanel implements Runnable {
    }
    
    public void paintComponent(Graphics g) { 
-      //super.paintComponent(g); // only needed if the entire bg is not painted
-
       g.drawImage(myImage, 0, 0, getWidth(), getHeight(), null);
 
       for (int y = 1; y < cellWidth * cells; y += cellWidth) {   // draw grid
@@ -253,7 +245,7 @@ public class SnakePanel extends JPanel implements Runnable {
    public void moveSnake(int x, int y) {
       if(ms > (1000 / difficulty)) { // only move after game has started
          if(spencer.head.xcor + x == apple.getxcor() && spencer.head.ycor + y == apple.getycor()) { // snake eats apple
-            //effectPlayer.playOnSeparateThread();
+            effectPlayer.play();
             fruits++;
             score += fruitWorth;
             fruitWorth = 100 + (fruits / 10) * 10; // fruitWorth scales as you eat more
@@ -263,7 +255,7 @@ public class SnakePanel extends JPanel implements Runnable {
             int outerBound = (cells - 1) * cellWidth + 1;
             if(spencer.head.xcor + x < 0 || spencer.head.xcor + x > outerBound || spencer.head.ycor + y < 0 || spencer.head.ycor + y > outerBound) { // wall check
                endGame();
-            } else if(spencer.ateSelf(x, y) == true && ms > 2 * (1000 / difficulty)) { // self check, 2x bc 1x is first move
+            } else if(spencer.ateSelf(x, y) == true && ms > 2 * (1000 / difficulty)) { // self check, 2x b/c 1x is first move
                endGame();
             } else {
                spencer.move(x, y, false); // move
@@ -276,7 +268,7 @@ public class SnakePanel extends JPanel implements Runnable {
       buttonsOff();
       score = ms = fruits = direction = 0; // direction: 0 = up, 1 = right, 2 = down, 3 = left
       fruitWorth = 100;        
-      keyUp = isPlaying = true; // direction + keyUp = starts game moving upwards
+      keyUp = isPlaying = true; // direction = 0 and keyUp = true -> starts game moving upwards
       keyDown = keyRight = keyLeft = startScreen = isPaused = false;
       spencer = new Snake(startPos, snakeLength);
       apple = new Apple(spencer);
