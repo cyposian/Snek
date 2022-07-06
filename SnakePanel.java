@@ -1,6 +1,5 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -9,11 +8,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.Scanner;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -27,7 +24,6 @@ public class SnakePanel extends JPanel implements Runnable {
    private final int cellWidth = 20;
    public static int direction, score, high, fruits, fruitWorth, ms;
    public static DecimalFormat deci;
-   public static String myFont, myFont2;
    private BufferedImage myImage;
    private boolean isPaused, isPlaying, startScreen, keyUp, keyDown, keyLeft, keyRight;
    private int startPos, difficulty;
@@ -47,8 +43,6 @@ public class SnakePanel extends JPanel implements Runnable {
       this.addKeyListener(new KeyHandler());
       this.setFocusable(true);
       myImage = new BufferedImage(825, 541, BufferedImage.TYPE_INT_RGB);
-      myFont = "Proxon"; // Header font   // IMPORTING FONT IF NOT INSTALLED***
-      myFont2 = "Monospaced"; // Body font
       startScreen = true;
       isPaused = isPlaying = false;
       fruitWorth = 100;
@@ -56,9 +50,6 @@ public class SnakePanel extends JPanel implements Runnable {
       deci = new DecimalFormat("0.00");
       spencer = new Snake(startPos, snakeLength);
       sidePanel = new SidePanel();
-
-      InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("./proxon/PROXON.ttf")
-      Font font = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(48f)
 
       try {
          infile = new Scanner(new File("snakeScore.txt"));   		
