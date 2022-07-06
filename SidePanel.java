@@ -17,7 +17,7 @@ public class SidePanel {
         deci = SnakePanel.deci;
 
         try {
-            InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("./proxon/PROXON.ttf");
+            InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("./font/PROXON.ttf");
             mainFont = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(48f);
          } catch (IOException e) {
             e.printStackTrace();
