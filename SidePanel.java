@@ -14,7 +14,7 @@ public class SidePanel {
 
     public SidePanel() {
         bodyFont = "Monospaced";
-        deci = SnakePanel.deci;
+        deci = new DecimalFormat("0.00");
 
         try {
             InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("./font/PROXON.ttf");

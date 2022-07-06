@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.text.DecimalFormat;
 import java.util.Scanner;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -23,7 +22,6 @@ public class SnakePanel extends JPanel implements Runnable {
    private final int cells = 25;
    private final int cellWidth = 20;
    public static int direction, score, high, fruits, fruitWorth, ms;
-   public static DecimalFormat deci;
    private BufferedImage myImage;
    private boolean isPaused, isPlaying, startScreen, keyUp, keyDown, keyLeft, keyRight;
    private int startPos, difficulty;
@@ -47,7 +45,6 @@ public class SnakePanel extends JPanel implements Runnable {
       isPaused = isPlaying = false;
       fruitWorth = 100;
       startPos = 1 + (cells / 2) * cellWidth;   // Snake starting position: center of grid
-      deci = new DecimalFormat("0.00");
       spencer = new Snake(startPos, snakeLength);
       sidePanel = new SidePanel();
 
@@ -284,7 +281,7 @@ public class SnakePanel extends JPanel implements Runnable {
             }
          outfile.println(score);
          outfile.println(fruits);
-         outfile.println(deci.format((double) ms / 1000));
+         outfile.println((double) ms / 1000);
          outfile.close();
       }
    }
