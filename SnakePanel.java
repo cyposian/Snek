@@ -63,7 +63,11 @@ public class SnakePanel extends JPanel implements Runnable {
       effectPlayer = new AudioPlayer(audioBite1);
       losePlayer = new AudioPlayer(audioLose);
 
-      speed1 = new JButton(new ImageIcon("./media/snail.png"));
+
+      ImageIcon icon1 = new ImageIcon(getClass().getResource("./media/snail.png"));
+
+      speed1 = new JButton(icon1);
+      //speed1 = new JButton(new ImageIcon("./media/snail.png"));
       speed1.setBounds(640, 320, 45, 45);
       defaultBorder = speed1.getBorder(); // save default border look
       speed1.addActionListener(new ActionListener() {

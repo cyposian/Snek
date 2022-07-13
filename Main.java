@@ -12,7 +12,7 @@ public class Main {
          SnakePanel snek = new SnakePanel();
        	 frame.setContentPane(snek);
          frame.setVisible(true);
-        Image i = Toolkit.getDefaultToolkit().getImage("snake.png");
+        Image i = Toolkit.getDefaultToolkit().getImage("./media/snake.png");
         frame.setIconImage(i);
 
         snek.startGameThread();
