@@ -49,9 +49,9 @@ public class SnakePanel extends JPanel implements Runnable {
       sidePanel = new SidePanel();
 
       try {
-         infile = new Scanner(new File("snakeScore.txt"));   		
+         infile = new Scanner(new File("SnakeScore.txt"));   		
       } catch(FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null,"snakeScore.txt could not be found.");
+            JOptionPane.showMessageDialog(null,"SnakeScore.txt could not be found.");
             System.exit(0);
       }
       high = infile.nextInt();
@@ -278,7 +278,7 @@ public class SnakePanel extends JPanel implements Runnable {
       if(score > high) {   
          PrintStream outfile = null;
          try {
-            outfile = new PrintStream(new FileOutputStream(("snakeScore.txt")));
+            outfile = new PrintStream(new FileOutputStream(("SnakeScore.txt")));
          }
             catch(FileNotFoundException f) {
                JOptionPane.showMessageDialog(null,"The file could not be created.");
