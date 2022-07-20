@@ -66,7 +66,6 @@ public class SnakePanel extends JPanel implements Runnable {
 
 
       ImageIcon icon1 = new ImageIcon(getClass().getResource("/media/snail.png"));
-
       speed1 = new JButton(icon1);
       //speed1 = new JButton(new ImageIcon("./media/snail.png"));
       speed1.setBounds(640, 320, 45, 45);
@@ -81,7 +80,8 @@ public class SnakePanel extends JPanel implements Runnable {
       });
       add(speed1);
       
-      speed2 = new JButton(new ImageIcon("./media/turtle.png"));
+      ImageIcon icon2 = new ImageIcon(getClass().getResource("/media/turtle.png"));
+      speed2 = new JButton(icon2);
       speed2.setBounds(695, 320, 45, 45);
       speed2.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -93,7 +93,8 @@ public class SnakePanel extends JPanel implements Runnable {
       });
       add(speed2);
       
-      speed3 = new JButton(new ImageIcon("./media/elephant.png"));
+      ImageIcon icon3 = new ImageIcon(getClass().getResource("/media/elephant.png"));
+      speed3 = new JButton(icon3);
       speed3.setBounds(750, 320, 45, 45);
       speed3.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -105,7 +106,8 @@ public class SnakePanel extends JPanel implements Runnable {
       });
       add(speed3);
       
-      speed4 = new JButton(new ImageIcon("./media/rabbit.png"));
+      ImageIcon icon4 = new ImageIcon(getClass().getResource("/media/rabbit.png"));
+      speed4 = new JButton(icon4);
       speed4.setBounds(640, 375, 45, 45);
       speed4.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -117,7 +119,8 @@ public class SnakePanel extends JPanel implements Runnable {
       });
       add(speed4);
       
-      speed5 = new JButton(new ImageIcon("./media/horse.png"));
+      ImageIcon icon5 = new ImageIcon(getClass().getResource("/media/horse.png"));
+      speed5 = new JButton(icon5);
       speed5.setBounds(695, 375, 45, 45);
       speed5.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -129,7 +132,8 @@ public class SnakePanel extends JPanel implements Runnable {
       });
       add(speed5);
       
-      speed6 = new JButton(new ImageIcon("./media/cheetah.png"));
+      ImageIcon icon6 = new ImageIcon(getClass().getResource("/media/cheetah.png"));
+      speed6 = new JButton(icon6);
       speed6.setBounds(750, 375, 45, 45);
       speed6.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -279,7 +283,7 @@ public class SnakePanel extends JPanel implements Runnable {
       if(score > high) {   
          PrintStream outfile = null;
          try {
-            outfile = new PrintStream(new FileOutputStream(("SnakeScore.txt")));
+            outfile = new PrintStream(new FileOutputStream(("./src/SnakeScore.txt")));
          }
             catch(FileNotFoundException f) {
                JOptionPane.showMessageDialog(null,"The file could not be created.");
