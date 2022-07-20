@@ -1,3 +1,4 @@
+package src;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -49,7 +50,7 @@ public class SnakePanel extends JPanel implements Runnable {
       sidePanel = new SidePanel();
 
       try {
-         infile = new Scanner(new File("SnakeScore.txt"));   		
+         infile = new Scanner(new File("./src/SnakeScore.txt"));   		
       } catch(FileNotFoundException e) {
             JOptionPane.showMessageDialog(null,"SnakeScore.txt could not be found.");
             System.exit(0);
@@ -64,7 +65,7 @@ public class SnakePanel extends JPanel implements Runnable {
       losePlayer = new AudioPlayer(audioLose);
 
 
-      ImageIcon icon1 = new ImageIcon(getClass().getResource("./media/snail.png"));
+      ImageIcon icon1 = new ImageIcon(getClass().getResource("/media/snail.png"));
 
       speed1 = new JButton(icon1);
       //speed1 = new JButton(new ImageIcon("./media/snail.png"));
