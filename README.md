@@ -1,6 +1,6 @@
 # Snek
 
-![Snek Start Screen](https://github.com/ysc996/Snek/blob/master/media/snekScreenStart.png?raw=true)
+![Snek Start Screen](https://github.com/ysc996/Snek/blob/master/media/snekStartScreen.png?raw=true)
 
 Snek is a version of the Snake video game genre implemented in Java with a retro graphics feel.
 
